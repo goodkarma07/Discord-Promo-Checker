@@ -29,7 +29,7 @@ pip install aiohttp tasksio colorama pyfiglet python-dateutil
 
 ## files
 
-before running, place the following files in the same directory as `checker.py`:
+before running, place the following files in the same directory as `main.py`:
 
 | file | contents |
 |------|----------|
