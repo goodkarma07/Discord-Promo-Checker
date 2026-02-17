@@ -1,49 +1,75 @@
-# promo-checker
-
-**by [@badykarma](https://t.me/badykarma) | [t.me/cheaprip](https://t.me/cheaprip)**
-
-fast async discord promotion code checker with multi-token + proxy rotation support.
-
----
-
-## features
-
-- async checking via `aiohttp` + `tasksio` task pool
-- multi-token rotation (round-robin)
-- proxy rotation with support for `http`, `https`, `socks4`, `socks5`
-- auth proxy support (`user:pass@host:port`)
-- rate limit handling with auto-retry
-- duplicate-safe output writing with async file lock
-- logs warnings/errors to `error.txt` with timestamps
-- valid codes saved to `valid.txt`, fully claimed to `claimed.txt`
-
----
-
-## setup
+<div align="center">
 
 ```
+██╗   ██╗██╗    ██╗██╗   ██╗
+██║   ██║██║    ██║██║   ██║
+██║   ██║██║ █╗ ██║██║   ██║
+██║   ██║██║███╗██║██║   ██║
+╚██████╔╝╚███╔███╔╝╚██████╔╝
+ ╚═════╝  ╚══╝╚══╝  ╚═════╝ 
+```
+
+# 🎀 promo-checker 🎀
+
+> *fast. silent. accurate.*
+
+[![Telegram](https://img.shields.io/badge/channel-t.me%2Fcheaprip-blue?style=for-the-badge&logo=telegram&logoColor=white&color=7289da)](https://t.me/cheaprip)
+[![Author](https://img.shields.io/badge/author-%40badykarma-pink?style=for-the-badge&logo=telegram&logoColor=white&color=ff69b4)](https://t.me/badykarma)
+[![Language](https://img.shields.io/badge/python-3.10%2B-purple?style=for-the-badge&logo=python&logoColor=white&color=9b59b6)](https://python.org)
+[![Async](https://img.shields.io/badge/async-aiohttp-blueviolet?style=for-the-badge&color=7d3c98)](https://docs.aiohttp.org)
+
+---
+
+*async discord promotion code checker with multi-token & proxy rotation*
+
+</div>
+
+---
+
+## ✨ features
+
+```
+  ✅  async checking with configurable worker pool
+  🔄  round-robin token rotation across all requests  
+  🌍  proxy rotation — http / https / socks4 / socks5
+  🔐  authenticated proxy support (user:pass@host:port)
+  🕒  automatic rate limit handling with retry
+  🔒  async file locking — no duplicate writes ever
+  📝  timestamped error logging to error.txt
+  💾  valid codes → valid.txt | claimed → claimed.txt
+```
+
+---
+
+## 📦 installation
+
+```bash
 pip install aiohttp tasksio colorama pyfiglet python-dateutil
 ```
 
 ---
 
-## files
+## 📁 file structure
 
-before running, place the following files in the same directory as `main.py`:
+```
+📂 promo-checker/
+ ├── 🐍 checker.py          ← main script
+ ├── 🪙 tokens.txt          ← your discord tokens (one per line)
+ ├── 🎟️  promotions.txt      ← promo codes or urls (one per line)
+ ├── 🌐 proxies.txt         ← proxies (one per line, optional)
+ │
+ ├── ✅ valid.txt            ← auto-generated: working codes
+ ├── 🚫 claimed.txt         ← auto-generated: fully used codes
+ └── 📋 error.txt           ← auto-generated: error log
+```
 
-| file | contents |
-|------|----------|
-| `tokens.txt` | one discord token per line |
-| `promotions.txt` | one promo code or full url per line |
-| `proxies.txt` | one proxy per line (optional) |
-
-`valid.txt`, `claimed.txt`, and `error.txt` are created automatically on first run.
+> `valid.txt`, `claimed.txt`, and `error.txt` are created automatically on first run.
 
 ---
 
-## proxy formats
+## 🌐 proxy formats
 
-all of the following formats are supported:
+all formats supported:
 
 ```
 host:port
@@ -52,13 +78,14 @@ http://host:port
 http://user:pass@host:port
 socks5://host:port
 socks5://user:pass@host:port
+socks4://host:port
 ```
 
 ---
 
-## promo formats
+## 🎟️ promo formats
 
-both raw codes and full urls work in `promotions.txt`:
+paste anything into `promotions.txt` — raw codes or full urls both work:
 
 ```
 https://discord.com/billing/promotions/XXXXXXXXXX
@@ -68,34 +95,73 @@ XXXXXXXXXX
 
 ---
 
-## usage
+## 🚀 usage
 
-```
+```bash
 python checker.py
 ```
 
-you'll be prompted for:
-- **delay** — seconds between dispatching each code (default `0.5`)
-- **workers** — max concurrent requests (default `50`)
+you'll be asked two things at startup:
+
+| prompt | default | description |
+|--------|---------|-------------|
+| ⏳ delay | `0.5s` | seconds between dispatching each code |
+| ⚡ workers | `50` | max concurrent requests running at once |
+
+just hit enter to use the defaults.
 
 ---
 
-## output
+## 📊 output
 
-| file | description |
-|------|-------------|
-| `valid.txt` | codes that are valid and still active |
-| `claimed.txt` | codes that exist but are fully used |
-| `error.txt` | timestamped log of warnings and errors |
-
----
-
-## notes
-
-- tokens and proxies are cycled round-robin across all codes
-- on rate limit (`429`), the checker sleeps for the `retry_after` duration then retries the same code
-- if no `proxies.txt` is found or it's empty, requests go through without a proxy
+| file | what goes in it |
+|------|----------------|
+| `✅ valid.txt` | active, claimable promotion codes |
+| `🚫 claimed.txt` | codes that exist but are fully redeemed |
+| `📋 error.txt` | timestamped log of all warnings and errors |
 
 ---
 
-made by **@badykarma** — join **[t.me/cheaprip](https://t.me/cheaprip)** for more tools
+## ⚙️ how it works
+
+```
+promotions.txt
+      │
+      ▼
+  [task pool] ── up to N workers running at once
+      │
+      ├─ picks next token  (round-robin)
+      ├─ picks next proxy  (round-robin)
+      └─ fires GET request to discord api
+            │
+            ├─ 200 → valid!    → saved to valid.txt
+            ├─ max uses hit    → saved to claimed.txt  
+            ├─ 429 rate limit  → sleeps, retries same code
+            └─ anything else   → logged to error.txt
+```
+
+---
+
+## ⚠️ notes
+
+- tokens and proxies cycle **round-robin** — every code gets a fresh token + proxy
+- on `429` rate limit the script sleeps for the exact `retry_after` time then retries
+- running without `proxies.txt` is fine — requests just go direct
+- file writes are protected by an async lock so no duplicates even at high concurrency
+
+---
+
+<div align="center">
+
+---
+
+```
+made with 🤍 by @badykarma
+```
+
+### 🔗 [t.me/cheaprip](https://t.me/cheaprip)
+*join for more tools, promos, tokens*
+
+---
+
+</div>
