@@ -87,7 +87,7 @@ XXXXXXXXXX
 ## 🚀 usage
 
 ```bash
-python checker.py
+python main.py
 ```
 
 you'll be asked two things at startup:
